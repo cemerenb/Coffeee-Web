@@ -1,4 +1,4 @@
-﻿<%@ Page Language="C#" EnableEventValidation="false" AutoEventWireup="true" CodeBehind="Orders.aspx.cs" Inherits="Coffeee_Web.Orders" Async="true" %>
+﻿<%@ Page Language="C#" EnableEventValidation="false" AutoEventWireup="true" CodeBehind="OrderDetails.aspx.cs" Inherits="Coffeee_Web.OrderDetails" Async="true" %>
 
 <!DOCTYPE html>
 
@@ -48,21 +48,28 @@
             border-bottom: 1px solid #ddd;
             border-radius: 8px 8px 0 0;
         }
-        .orderCardHeader {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
+        .orderImageHeader {
+    background-color: white;
+   color: white;
+    padding: 10px;
+    text-align: center;
+    border-bottom: 1px solid #ddd;
+    border-radius: 8px 8px 0 0;
+}
 
-    .orderButton {
-        margin-left: 20px; /* Adjust the value as needed for the desired padding */
-    }
+        .itemImage {
+            width: 100px; /* Belirli bir genişlik değeri */
+            height: auto; /* Otomatik yükseklik ayarı */
+            border-radius: 15px;
+            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+            margin-right: 10px; /* Ayarlanabilir */
+        }
     </style>
 </head>
 <body>
     <form id="form1" runat="server">
         <div id="orderContainer">
-            <h1>Your Orders</h1>
+
             <asp:ListView ID="lvOrders" runat="server" ItemPlaceholderID="itemPlaceholder">
                 <LayoutTemplate>
                     <ul>
@@ -72,31 +79,17 @@
                 <ItemTemplate>
                     <li class="orderCard">
                         <div class="orderCardHeader">
-                            Order ID: <asp:Label runat="server" ID="Label1" Text='<%# Eval("OrderId") %>'></asp:Label>
-                            <asp:Button runat="server" ID="YourButtonID" CssClass="orderButton" Text="Details" OnClick="ViewDetails_Click" />
+                            <asp:Label runat="server" ID="Label1" Text='<%# Eval("MenuItemName") %>'></asp:Label>
                         </div>
-
-                        
-                        <div class="orderCardContent">
-                            User Email: <asp:Label runat="server" ID="lblOrderId" Text='<%# Eval("UserEmail") %>'></asp:Label>
-                            <!-- Example: Product, Quantity, Date, etc. -->
+                        <div class ="orderImageHeader">
+                            <img runat="server" class="itemImage" src='<%# Eval("MenuItemImageLink") %>' alt='<%# Eval("MenuItemName") %>' />
                         </div>
                         <div class="orderCardContent">
-    Order Status: <asp:Label runat="server" ID="Label6" Text='<%# Eval("OrderStatus") %>'></asp:Label>
-    <!-- Example: Product, Quantity, Date, etc. -->
-</div>
+                            Count: <asp:Label runat="server" ID="Label11" Text='<%# Eval("ItemCount") %>'></asp:Label>
+                        </div>
                         <div class="orderCardContent">
-    Order Total: <asp:Label runat="server" ID="Label11" Text='<%# Eval("OrderTotalPrice") %>'></asp:Label>₺
-    <!-- Example: Product, Quantity, Date, etc. -->
-</div>
-                        <div class="orderCardContent">
-    Order Date:<asp:Label runat="server" ID="Label16" Text='<%# SplitOrderCreatingTime(Eval("OrderCreatingTime"))%>'></asp:Label>
-    <!-- Example: Product, Quantity, Date, etc. -->
-</div>
-                <div class="orderCardContent">
-    Order Note:  <asp:Label runat="server" ID="Label2" Text='<%# Eval("OrderNote") %>'></asp:Label>
-    <!-- Example: Product, Quantity, Date, etc. -->
-                </div>
+                            Total: <asp:Label runat="server" ID="Label2" Text='<%# Eval("MenuItemTotal") %>'></asp:Label>
+                        </div>
                     </li>
                 </ItemTemplate>
             </asp:ListView>

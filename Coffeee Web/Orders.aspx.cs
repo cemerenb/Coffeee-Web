@@ -2,7 +2,10 @@
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
+using System.Web.UI;
 using Newtonsoft.Json;
+using System.Web.UI.WebControls;
+
 
 namespace Coffeee_Web
 {
@@ -11,19 +14,19 @@ namespace Coffeee_Web
         protected async void Page_Load(object sender, EventArgs e)
         {
             // Check if the email parameter exists in the query string
-            if (!string.IsNullOrEmpty(Request.QueryString["email"]))
+            if (!string.IsNullOrEmpty(Request.QueryString["token"]))
             {
                 // Retrieve the email parameter value
-                string userEmail = Request.QueryString["email"];
+                string token = Request.QueryString["token"];
 
                 // Call the API to get all orders
-                var orders = await GetOrdersFromApi();
+                var orders = await GetOrdersFromApi(token);
 
                 // Filter orders based on matching storeEmail
-                var userOrders = FilterOrdersByStoreEmail(orders, userEmail);
+                
 
                 // Bind the filtered orders to a ListView or another control
-                lvOrders.DataSource = userOrders;
+                lvOrders.DataSource = orders;
                 lvOrders.DataBind();
             }
             else
@@ -32,14 +35,22 @@ namespace Coffeee_Web
                 Response.Redirect("LoginPage.aspx"); // Redirect to the login page or handle accordingly
             }
         }
+        protected void ViewDetails_Click(object sender, EventArgs e)
+        {
+            // Get the OrderId from the Label associated with the clicked button
+            string orderId = ((Label)((Control)sender).Parent.FindControl("Label1")).Text;
 
-        private async Task<Order[]> GetOrdersFromApi()
+            // Redirect to OrderDetails.aspx with the OrderId as a query parameter
+            Response.Redirect($"OrderDetails.aspx?OrderId={orderId}",false);
+        }
+        
+        private async Task<Order[]> GetOrdersFromApi(String token)
         {
             
                 using (HttpClient client = new HttpClient())
                 {
                     // Replace "YourApiEndpoint" with the actual API endpoint for getting orders
-                    string apiEndpoint = "http://localhost:7094/api/Order/get-orders";
+                    string apiEndpoint = $"http://localhost:7094/api/Order/get-store-orders?AccessToken={token}";
 
                     // Make a GET request to the API
                     HttpResponseMessage response = await client.GetAsync(apiEndpoint);
@@ -98,7 +109,7 @@ namespace Coffeee_Web
         public string OrderStatus { get; set; }
         public string OrderTotalPrice { get; set; }
         public string OrderCreatingTime { get; set; }
-
+        public string OrderNote { get; set; }
         public string StoreEmail { get; set; }
         // Add other properties of your Order class
     }

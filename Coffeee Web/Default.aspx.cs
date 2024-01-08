@@ -12,66 +12,74 @@ namespace Coffeee_Web
     {
         protected async void LoginButton_Click(object sender, EventArgs e)
         {
-            // Handle the Log In button click event
             string email = EmailTextBox.Text;
             string password = PasswordTextBox.Text;
 
-            // Example: Check if the email and password are valid
             if (!string.IsNullOrEmpty(email) && !string.IsNullOrEmpty(password))
             {
-                // Make an API call with the email and password
-                bool loginSuccess = await CallLoginApi(email, password);
+                String loginMessage = await CallLoginApi(email, password);
 
-                // Check the API response
-                if (loginSuccess)
+                if (loginMessage != "Error")
                 {
-                    // Redirect to the Orders page with the user's email as a query parameter
-                    Response.Redirect($"Orders.aspx?email={HttpUtility.UrlEncode(email)}");
+                     SaveEmailAsCookie(email);
+                    Response.Redirect($"Orders.aspx?token={HttpUtility.UrlEncode(loginMessage)}");
                 }
                 else
                 {
-                    // Display an error message or redirect to a login failure page
                     ClientScript.RegisterStartupScript(this.GetType(), "showErrorPopup", "showErrorPopup();", true);
                 }
             }
         }
+        private void SaveEmailAsCookie(string email)
+        {
+            HttpCookie emailCookie = new HttpCookie("Email");
 
-        private async Task<bool> CallLoginApi(string email, string password)
+            emailCookie.Value = email;
+
+            Response.SetCookie(emailCookie);
+        }
+        private async Task<String> CallLoginApi(string email, string password)
         {
             try
             {
                 using (HttpClient client = new HttpClient())
                 {
-                    // Replace "YourApiEndpoint" with the actual API endpoint
                     string apiEndpoint = "http://localhost:7094/api/Store/login";
 
-                    // Example: Prepare the request payload
                     var requestData = new { storeEmail = email, storePassword = password };
 
-                    // Convert the request data to JSON
                     var jsonContent = new StringContent(JsonConvert.SerializeObject(requestData), Encoding.UTF8, "application/json");
 
-                    // Make a POST request to the API
                     HttpResponseMessage response = await client.PostAsync(apiEndpoint, jsonContent);
 
-                    // Check if the API call was successful (status code 200)
                     if (response.IsSuccessStatusCode)
                     {
-                        // Return true to indicate successful login
-                        return true;
+                        string responseContent = await response.Content.ReadAsStringAsync();
+
+                        string[] parts = responseContent.Split('-');
+
+                        if (parts.Length > 0)
+                        {
+                            Console.WriteLine("Logged in successfully. Log: " + parts[0]);
+                        }
+
+                        return parts[0];
                     }
                     else
                     {
-                        // Return false to indicate login failure
-                        return false;
+                        string errorResponse = await response.Content.ReadAsStringAsync();
+                        Console.WriteLine("Login failed. Error: " + errorResponse);
+
+                        return "Error";
                     }
                 }
             }
             catch (Exception ex)
             {
-                // Log or handle the exception as needed
-                return false;
+                Console.WriteLine("Exception during login: " + ex.Message);
+                return "Error";
             }
         }
+
     }
 }
